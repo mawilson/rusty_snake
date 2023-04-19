@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::env;
 
 mod logic;
+mod util;
 
 // API and Response Objects
 // See https://docs.battlesnake.com/api

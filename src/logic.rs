@@ -16,6 +16,7 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 
 use crate::{Battlesnake, Board, Game};
+use crate::util::{safe_move};
 
 // info is called when you create your Battlesnake on play.battlesnake.com
 // and controls your Battlesnake's appearance
@@ -74,8 +75,25 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     }
 
     // TODO: Step 1 - Prevent your Battlesnake from moving out of bounds
-    // let board_width = &board.width;
-    // let board_height = &board.height;
+
+    if my_head.x == 0 { // prevent integer underflow
+        is_move_safe.insert("left", false);
+    } else {
+        if !safe_move(my_head.x - 1, my_head.y, &_board) {
+            is_move_safe.insert("left", false);
+        } else if !safe_move(my_head.x + 1, my_head.y, &_board) {
+            is_move_safe.insert("right", false);
+        }
+    }
+    if my_head.y == 0 { // prevent integer underflow
+        is_move_safe.insert("down", false);
+    } else {
+        if !safe_move(my_head.x, my_head.y - 1, &_board) {
+            is_move_safe.insert("down", false);
+        } else if !safe_move(my_head.x, my_head.y + 1, &_board) {
+            is_move_safe.insert("up", false);
+        }
+    }
 
     // TODO: Step 2 - Prevent your Battlesnake from colliding with itself
     // let my_body = &you.body;

@@ -121,6 +121,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chicken-in-a-biskitsnake"
+version = "1.0.0"
+dependencies = [
+ "env_logger",
+ "log",
+ "rand",
+ "rocket",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "const_fn"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1073,18 +1085,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e113fb6f3de07a243d434a56ec6f186dfd51cb08448239fe7bcae73f87ff28ff"
 dependencies = [
  "version_check",
-]
-
-[[package]]
-name = "starter-snake-rust"
-version = "1.0.0"
-dependencies = [
- "env_logger",
- "log",
- "rand",
- "rocket",
- "serde",
- "serde_json",
 ]
 
 [[package]]
