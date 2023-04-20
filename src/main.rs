@@ -32,6 +32,45 @@ pub struct Board {
     hazards: Vec<Coord>,
 }
 
+#[derive(Debug)]
+pub struct Board2dCell {
+    coord: Coord,
+    snake: Option<String>, // optional snake ID
+    hazard: i32, // hazard can be negative, as with healing pools
+    food: bool
+}
+
+#[derive(Debug)]
+pub struct Board2d {
+    height: u32,
+    width: u32,
+    cells: Vec<Board2dCell>
+}
+
+impl Board2d {
+    fn new(board: &Board) -> Self {
+        let size = board.height * board.width;
+        Self {
+            height: board.height,
+            width: board.width,
+            cells: {
+                let mut arr: Vec<Board2dCell> = Vec::new();
+                for index in 0..size {
+                    let x = index / board.height;
+                    let y = index % board.height;
+                    arr.push(Board2dCell {
+                        coord: Coord { x, y },
+                        snake: None,
+                        hazard: 0,
+                        food: false
+                    });
+                }
+                arr
+            }
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Battlesnake {
     id: String,

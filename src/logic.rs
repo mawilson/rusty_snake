@@ -15,7 +15,7 @@ use rand::seq::SliceRandom;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
-use crate::{Battlesnake, Board, Game};
+use crate::{Battlesnake, Board, Game, Board2d};
 use crate::util::{safe_move};
 
 // info is called when you create your Battlesnake on play.battlesnake.com
@@ -48,6 +48,10 @@ pub fn end(_game: &Game, _turn: &u32, _board: &Board, _you: &Battlesnake) {
 // See https://docs.battlesnake.com/api/example-move for available data
 pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> Value {
     
+    // build Board2d
+    let board2d = Board2d::new(_board);
+    println!("board looks like this: {:?}", board2d);
+
     let mut is_move_safe: HashMap<_, _> = vec![
         ("up", true),
         ("down", true),
@@ -93,7 +97,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
         } else if !safe_move(my_head.x, my_head.y + 1, &_board) {
             is_move_safe.insert("up", false);
         }
-    }
+    }    
 
     // TODO: Step 2 - Prevent your Battlesnake from colliding with itself
     // let my_body = &you.body;
