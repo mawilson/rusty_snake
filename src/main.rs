@@ -8,7 +8,7 @@ use rocket::serde::{json::Json, Deserialize};
 use serde::Serialize;
 use serde_json::{Value};
 use std::collections::HashMap;
-use std::env;
+use std::{env, fmt};
 
 mod logic;
 mod util;
@@ -48,7 +48,7 @@ pub struct Board2d {
 }
 
 impl Board2d {
-    fn new(board: &Board) -> Self {
+    fn new(board: &Board) -> Self { // Board2d constructor
         let size = board.height * board.width;
         Self {
             height: board.height,
@@ -68,6 +68,42 @@ impl Board2d {
                 arr
             }
         }
+    }
+    fn get_cell(&self, c: Coord) -> &Board2dCell { // should this return an Option?
+        let index = (c.x * self.width + c.y) as usize;
+        &self.cells[index]
+    }
+}
+
+impl fmt::Display for Board2d {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut str: String = String::from(""); 
+        for j in (0..self.height).rev() {
+            for i in 0..self.width {
+                //let index = (i * self.width + j) as usize;
+                //let cell = &self.cells[index];
+                let cell = &self.get_cell(Coord { x: i, y: j });
+                if let Some(snake) = &cell.snake {
+                    str.push_str("s ");
+                } else if cell.food {
+                    if cell.hazard > 0 {
+                        str.push_str("F ");
+                    } else {
+                        str.push_str("f ");
+                    }
+                } else if cell.hazard > 0 {
+                    str.push_str("h ");
+                } else {
+                    str.push_str(&format!("({},{}) ", i, j)); // useful for debugging coords of board
+                    //str.push_str("x ");
+                }
+            }
+            if j != 0 {
+                str.push_str("\n");
+            }
+        }
+
+        write!(f, "{}", str)
     }
 }
 
