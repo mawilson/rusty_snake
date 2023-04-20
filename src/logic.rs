@@ -50,7 +50,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     
     // build Board2d
     let board2d = Board2d::new(_board);
-    println!("board looks like this: {:?}", board2d);
+    println!("turn {} board looks like this:\n{}", turn, board2d);
 
     let mut is_move_safe: HashMap<_, _> = vec![
         ("up", true),
