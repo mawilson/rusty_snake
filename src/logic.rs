@@ -15,7 +15,7 @@ use rand::seq::SliceRandom;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
-use crate::{Battlesnake, Board, Game, Board2d};
+use crate::classes::{Battlesnake, Board, Game, Board2d};
 use crate::util::{safe_move};
 
 // info is called when you create your Battlesnake on play.battlesnake.com
@@ -26,10 +26,10 @@ pub fn info() -> Value {
 
     return json!({
         "apiversion": "1",
-        "author": "", // TODO: Your Battlesnake Username
-        "color": "#888888", // TODO: Choose color
-        "head": "default", // TODO: Choose head
-        "tail": "default", // TODO: Choose tail
+        "author": "waryferryman",
+        "color": "#ee2c2c",
+        "head": "chicken",
+        "tail": "ghost"
     });
 }
 
@@ -49,7 +49,8 @@ pub fn end(_game: &Game, _turn: &u32, _board: &Board, _you: &Battlesnake) {
 pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> Value {
     
     // build Board2d
-    let board2d = Board2d::new(_board);
+
+    let board2d = Board2d::new(_board, _game.ruleset.settings.hazardDamagePerTurn);
     println!("turn {} board looks like this:\n{}", turn, board2d);
 
     let mut is_move_safe: HashMap<_, _> = vec![
@@ -83,18 +84,20 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     if my_head.x == 0 { // prevent integer underflow
         is_move_safe.insert("left", false);
     } else {
-        if !safe_move(my_head.x - 1, my_head.y, &_board) {
+        if !safe_move(my_head.x - 1, my_head.y, &board2d) {
             is_move_safe.insert("left", false);
-        } else if !safe_move(my_head.x + 1, my_head.y, &_board) {
+        }
+        if !safe_move(my_head.x + 1, my_head.y, &board2d) {
             is_move_safe.insert("right", false);
         }
     }
     if my_head.y == 0 { // prevent integer underflow
         is_move_safe.insert("down", false);
     } else {
-        if !safe_move(my_head.x, my_head.y - 1, &_board) {
+        if !safe_move(my_head.x, my_head.y - 1, &board2d) {
             is_move_safe.insert("down", false);
-        } else if !safe_move(my_head.x, my_head.y + 1, &_board) {
+        }
+        if !safe_move(my_head.x, my_head.y + 1, &board2d) {
             is_move_safe.insert("up", false);
         }
     }    
@@ -106,6 +109,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     // let opponents = &board.snakes;
 
     // Are there any safe moves left?
+    info!("is_move_safe on turn {}: {:?}", turn, is_move_safe);
     let safe_moves = is_move_safe
         .into_iter()
         .filter(|&(_, v)| v)
@@ -113,10 +117,15 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
         .collect::<Vec<_>>();
     
     // Choose a random move from the safe ones
-    let chosen = safe_moves.choose(&mut rand::thread_rng()).unwrap();
+    let chosen = match safe_moves.is_empty() {
+        true => &"up", // default move is up when no alternatives are found
+        false => safe_moves.choose(&mut rand::thread_rng()).unwrap()
+    };
+    //let chosen = safe_moves.choose(&mut rand::thread_rng()).unwrap();
 
     // TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
     // let food = &board.food;
+    info!("safe_moves on turn {}: {:?}", turn, safe_moves);
 
     info!("MOVE {}: {}", turn, chosen);
     return json!({ "move": chosen });
