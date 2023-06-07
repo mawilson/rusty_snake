@@ -50,7 +50,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     
     // build Board2d
 
-    let board2d = Board2d::new(_board, _game.ruleset.settings.hazardDamagePerTurn);
+    let board2d = Board2d::new(_board, _game.ruleset.settings.hazardDamagePerTurn, _game.ruleset.name == "wrapped");
     println!("turn {} board looks like this:\n{}", turn, board2d);
 
     let mut is_move_safe: HashMap<_, _> = vec![
@@ -109,7 +109,7 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
     // let opponents = &board.snakes;
 
     // Are there any safe moves left?
-    info!("is_move_safe on turn {}: {:?}", turn, is_move_safe);
+    //info!("is_move_safe on turn {}: {:?}", turn, is_move_safe);
     let safe_moves = is_move_safe
         .into_iter()
         .filter(|&(_, v)| v)
@@ -125,8 +125,8 @@ pub fn get_move(_game: &Game, turn: &u32, _board: &Board, you: &Battlesnake) -> 
 
     // TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
     // let food = &board.food;
-    info!("safe_moves on turn {}: {:?}", turn, safe_moves);
+    //info!("safe_moves on turn {}: {:?}", turn, safe_moves);
 
-    info!("MOVE {}: {}", turn, chosen);
+    //info!("MOVE {}: {}", turn, chosen);
     return json!({ "move": chosen });
 }

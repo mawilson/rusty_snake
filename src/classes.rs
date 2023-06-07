@@ -2,14 +2,21 @@ use rocket::serde::Deserialize;
 use serde::Serialize;
 use std::fmt;
 
-#[derive(Deserialize, Serialize, Debug)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Game {
     pub id: String,
     pub ruleset: Ruleset,
     pub timeout: u32,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Ruleset {
     pub name: String,
     pub version: String,
@@ -17,7 +24,7 @@ pub struct Ruleset {
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct RulesetSettings {
     pub foodSpawnChance: u32,
     pub minimumFood: u32,
@@ -27,13 +34,13 @@ pub struct RulesetSettings {
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct RoyaleSettings {
     pub shrinkEveryNTurns: u32
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SquadSettings {
     pub allowBodyCollisions: bool,
     pub sharedElimination: bool,
@@ -41,7 +48,7 @@ pub struct SquadSettings {
     pub sharedLength: bool
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Board {
     pub height: u32,
     pub width: u32,
@@ -50,7 +57,7 @@ pub struct Board {
     pub hazards: Vec<Coord>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Board2dCell {
     pub coord: Coord,
     pub snake: Option<Battlesnake>, // will want to be an Option reference to the snake later after we figure lifetimes out
@@ -58,15 +65,17 @@ pub struct Board2dCell {
     pub food: bool
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Board2d {
     pub height: u32,
     pub width: u32,
-    cells: Vec<Board2dCell>
+    cells: Vec<Board2dCell>,
+    pub is_wrapped: bool,
+    pub snakes: Vec<Battlesnake>
 }
 
 impl Board2d {
-    pub fn new(board: &Board, hazard_damage: i32) -> Self { // Board2d constructor
+    pub fn new(board: &Board, hazard_damage: i32, is_wrapped: bool) -> Self { // Board2d constructor
         let size = board.height * board.width;
         Self {
             height: board.height,
@@ -90,8 +99,10 @@ impl Board2d {
                 }
 
                 for hazard in &board.hazards { // for the moment hazard lives as an i32, may be positive or negative, & sums up all hazards found on a single coord
-                    let index = (hazard.x * board.width + hazard.y) as usize;
-                    arr[index].hazard += hazard_damage;
+                    if hazard.x < board.width && hazard.y < board.height { // snail mode may have hazards that don't exist on board, ignore these
+                        let index = (hazard.x * board.width + hazard.y) as usize;
+                        arr[index].hazard += hazard_damage;
+                    }
                 }
 
                 for snake in &board.snakes { // iterate snakes on board, then iterate their bodies to add to board
@@ -111,7 +122,10 @@ impl Board2d {
                 }
 
                 arr
-            }
+            },
+            is_wrapped,
+            snakes: board.snakes.clone()
+
         }
     }
     pub fn get_cell(&self, c: Coord) -> &Board2dCell { // should this return an Option?
@@ -153,7 +167,7 @@ impl fmt::Display for Board2d {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Battlesnake {
     pub id: String,
     pub name: String,
@@ -171,10 +185,17 @@ pub struct Coord {
     pub y: u32,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct GameState {
     pub game: Game,
     pub turn: u32,
     pub board: Board,
+    pub you: Battlesnake,
+}
+
+#[derive(Clone)] // doesn't need to be serialized, but does need to be cloned
+pub struct GameStateC {
+    pub turn: u32,
+    pub board2d: Board2d,
     pub you: Battlesnake,
 }
