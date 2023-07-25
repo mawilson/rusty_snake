@@ -136,15 +136,15 @@ pub fn move_snake(b: &Board2d, snake: &mut Battlesnake, dir: Direction) -> bool 
 }
 
 // takes a GameStateC & updates it, incrementing turn, removing dead snakes, updating hazard, food if possible
-pub fn update_game(game: &mut GameStateC) {
-    game.turn = game.turn + 1;
-    let live_snakes: Vec<Battlesnake> = Vec::new(); // will replace old game snakes with this one after checking to see which are still alive
-    for snake in &game.board2d.snakes {
-        if snake.health > 0 { // if snake health is 0, can ignore it as it has starved
-            for other_snakes in &game.board2d.snakes { // look through other snakes to see if I've collided with any of them
+// pub fn update_game(game: &mut GameStateC) {
+//     game.turn = game.turn + 1;
+//     let live_snakes: Vec<Battlesnake> = Vec::new(); // will replace old game snakes with this one after checking to see which are still alive
+//     for snake in &game.board2d.snakes {
+//         if snake.health > 0 { // if snake health is 0, can ignore it as it has starved
+//             for other_snakes in &game.board2d.snakes { // look through other snakes to see if I've collided with any of them
 
-            }
-        }
-    }
-    game.board2d = game.board2d;
-}
+//             }
+//         }
+//     }
+//     game.board2d = game.board2d;
+// }
